@@ -1,72 +1,85 @@
 import java.util.Scanner;
 
-public class ArrayLife {
+/**
+ * This class is a game engine for the game "Game of Life". This class uses the format "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS" as argument. For example, "Glider:Richard Guy:20:20:1:1:010 001 111". This class uses the Pattern class.
+ */
+public final class ArrayLife {
     //instance vars and constants;
-    private String name;
-    private String author;
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
     private boolean[][] world;
+    private Pattern pattern;
+    //other insatnce vars
+    //the actives and nextActives just keep track the changed cells and their neighbors of the world to simply avoid going through the whole array and checking every cell of it.
     private int[] activeCols;
     private int[] activeRows;
     private int activeCounter;
-
     private int[] nextActiveCols;
     private int[] nextActiveRows;
     private boolean[][] inActiveList;
-
-
+    //characters used
     private final char liveCell = '\u2588';
     private final char deadCell = '\u0020';
-    //constructors;
-    public ArrayLife(String format){
-        String[] formatArr = format.split(":");
-        name = formatArr[0];
-        author = formatArr[1];
-        width = Integer.parseInt(formatArr[2]);
-        height = Integer.parseInt(formatArr[3]);
 
+    //constructors;
+
+    /**
+     *This constructor automatically interacts with the Pattern class
+     * @param format "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS"
+     */
+    public ArrayLife(String format){
+        pattern = new Pattern(format);
+        width = pattern.getWidth();
+        height = pattern.getHeight();
         world = new boolean[height][width];
+
         activeCols = new int[width*height];
         activeRows = new int[width*height];
         activeCounter = 0;
-
         nextActiveCols = new int[width*height];
         nextActiveRows = new int[width*height];
         inActiveList = new boolean[height][width];
 
-        int startUpperCol = Integer.parseInt(formatArr[4]);
-        int startUpperRow = Integer.parseInt(formatArr[5]);
-        String[] cellsOnRow =  formatArr[6].split(" ");
-
-        boolean isAlive;
-        for(int i = 0; i<cellsOnRow.length; i++){
-            for(int j = 0; j<cellsOnRow[i].length(); j++){
-                isAlive = cellsOnRow[i].charAt(j) == '1';
-                if(isAlive){
-                    int r =startUpperRow+i;
-                    int c =startUpperCol+j;
-                    world[r][c] = true;
-                    //adding the cell and its neighbors to the active list;
-                    for(int nr=r-1;nr<=r+1;nr++){
-                        for(int nc=c-1;nc<=c+1;nc++){
-                            if(nr>0 && nr<height && nc>0 && nc<width){
-                                if(!inActiveList[nr][nc]){
-                                    inActiveList[nr][nc] = true;
-                                    activeRows[activeCounter] = nr;
-                                    activeCols[activeCounter] = nc;
+        pattern.initialise(world);
+        /*
+         * DESIGN NOTE ON EFFICIENCY VS. OOP "SEPARATION OF CONCERNS":
+         * I am aware that sweeping the entire board here is less efficient than
+         * simply calling pattern.getCells().split(" ") and building the initial
+         * active list by only looking at the explicitly provided starting coordinates.
+         * However, parsing that string inside ArrayLife violates the "Separation
+         * of Concerns" required in Part 3. The Pattern class should be the ONLY
+         * class handling string formats. Therefore, I chose to accept THIS ONE-TIME,
+         * full-board sweep during startup. This keeps ArrayLife completely blind to
+         * the string format, while keeping my nextGeneration() engine fully optimized.
+         */
+        for(int i = 0; i<height; i++){
+            for(int j = 0; j<width; j++){
+                //adding the cell and its neighbors to the active list;
+                if(world[i][j]){
+                    for(int r=i-1;r<=i+1;r++){
+                        for(int c=j-1;c<=j+1;c++){
+                            if(r>=0 && r<height && c>=0 && c<width){
+                                if(!inActiveList[r][c]){ //checking for duplicates
+                                    inActiveList[r][c] = true;
+                                    activeRows[activeCounter] = r;
+                                    activeCols[activeCounter] = c;
                                     activeCounter++;
                                 }
                             }
                         }
                     }
-
                 }
             }
         }
-
     }
     //..
+
+    /**
+     * This method return the value of the cell
+     * @param col The column of the cell
+     * @param row The row of the cell
+     * @return the value of the cell
+     */
     public boolean getCell(int col, int row) {
         if(col < 0 || col >= width || row < 0 || row >= height){
             System.out.println("Fatal error.");
@@ -74,6 +87,13 @@ public class ArrayLife {
         }
         return world[row][col];
     }
+
+    /**
+     * Assigns the specific cell to the given boolean value
+     * @param col The column of the cell
+     * @param row The row of the cell
+     * @param value The value to be assigned
+     */
     public void setCell(int col, int row, boolean value) {
         if(col < 0 || col >= width || row < 0 || row >= height){
             System.out.println("Fatal error.");
@@ -84,10 +104,13 @@ public class ArrayLife {
 
     }
 
+    /**
+     * Prints the gameBoard
+     */
     public void print(){
         System.out.println(toString());
     }
-    public int countNeighbors(int col, int row){
+    private int countNeighbors(int col, int row){
         if(col < 0 || col >= width || row < 0 || row >= height){
             System.out.println("Fatal error.");
             System.exit(0);
@@ -116,7 +139,7 @@ public class ArrayLife {
             count++;
         return count;
     }
-    public boolean computeCell(int col, int row){
+    private boolean computeCell(int col, int row){
         if(col < 0 || col >= width || row < 0 || row >= height){
             System.out.println("Fatal error.");
             System.exit(0);
@@ -137,6 +160,10 @@ public class ArrayLife {
         }
         return false; //to keep the compiler happy;
     }
+
+    /**
+     * Updates the game board to the next generation
+     */
     public void nextGeneration(){
         boolean[][] nextWorld = new boolean[height][width];
         int nextActiveCounter = 0;
@@ -179,6 +206,11 @@ public class ArrayLife {
         activeCounter = nextActiveCounter;
 
     }
+
+    /**
+     * Generates and returns the string representation of the board
+     * @return the string representation of the board
+     */
     public String toString(){
         String result = "";
         for(int row = 0; row < height; row++){
@@ -189,6 +221,10 @@ public class ArrayLife {
         }
         return result;
     }
+
+    /**
+     * This method aks for user input and uses the print() method and the nextGeneration() method repeatedly.
+     */
     public void play(){
         Scanner scan = new Scanner(System.in);
         System.out.println("Enter your choice: s or q.");
@@ -210,6 +246,10 @@ public class ArrayLife {
 
     }
 
+    /**
+     * For testing the class
+     * @param args
+     */
     public static void main(String[] args){
         ArrayLife al = new ArrayLife(args[0]);
         al.play();
