@@ -1,3 +1,5 @@
+package am.aua.gameoflife.core;
+
 /**
  * This class is for giving a pattern in the form of "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS, which extracts it and sets the components of the board of ArrayLife.
  */
@@ -101,19 +103,38 @@ public class Pattern {
             }
         }
     }
-
     /**
-     * The main method is for testing purposes
-     * @param args
+     * Initialises a board represented as a primitive type of long and returns it. Be aware that calling this method more than once can cause bugs. Do it if you know what you are doing.
+     * @return the board of type long
      */
-    public static void main(String[] args){
-        Pattern pattern = new Pattern(args[0]);
-        System.out.println("Name:  " + pattern.getName());
-        System.out.println("Author:  " + pattern.getAuthor());
-        System.out.println("Width:  " + pattern.getWidth());
-        System.out.println("Height:  " + pattern.getHeight());
-        System.out.println("StartCol:  " + pattern.getStartCol());
-        System.out.println("StartRow:  " + pattern.getStartRow());
-        System.out.println("Pattern:  " + pattern.getCells());
+    public long initialize(){
+        long world = 0;
+        String[] cellsOnRow =  cells.split(" ");
+        boolean isAlive;
+        for(int i = 0; i<cellsOnRow.length; i++){
+            for(int j = 0; j<cellsOnRow[i].length(); j++){
+                isAlive = cellsOnRow[i].charAt(j) == '1';
+                if(isAlive) {
+                    int r = startRow + i;
+                    int c = startCol + j;
+                    world |= 1L << (r * width + c);
+
+                }
+            }
+        }
+        return world;
     }
+
+//    public static void main(String[] args){
+//        Pattern pattern = new Pattern(args[0]);
+//        System.out.println("Name:  " + pattern.getName());
+//        System.out.println("Author:  " + pattern.getAuthor());
+//        System.out.println("Width:  " + pattern.getWidth());
+//        System.out.println("Height:  " + pattern.getHeight());
+//        System.out.println("StartCol:  " + pattern.getStartCol());
+//        System.out.println("StartRow:  " + pattern.getStartRow());
+//        System.out.println("Pattern:  " + pattern.getCells());
+//    }
+
+
 }

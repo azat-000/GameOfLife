@@ -1,7 +1,9 @@
+package am.aua.gameoflife.core;
+
 import java.util.Scanner;
 
 /**
- * This class is a game engine for the game "Game of Life". This class uses the format "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS" as argument. For example, "Glider:Richard Guy:20:20:1:1:010 001 111". This class uses the Pattern class.
+ * This class is a game engine for the game "Game of Life". It uses the format "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS" given as argument. For example, "Glider:Richard Guy:20:20:1:1:010 001 111". This class uses the Pattern class.
  */
 public final class ArrayLife {
     //instance vars and constants;
@@ -9,7 +11,7 @@ public final class ArrayLife {
     private final int height;
     private boolean[][] world;
     private Pattern pattern;
-    //other insatnce vars
+    //other instance vars
     //the actives and nextActives just keep track the changed cells and their neighbors of the world to simply avoid going through the whole array and checking every cell of it.
     private int[] activeCols;
     private int[] activeRows;
@@ -100,8 +102,6 @@ public final class ArrayLife {
             System.exit(0);
         }
         world[row][col] = value;
-
-
     }
 
     /**
@@ -245,14 +245,12 @@ public final class ArrayLife {
         }
 
     }
-
-    /**
-     * For testing the class
-     * @param args
-     */
-    public static void main(String[] args){
-        ArrayLife al = new ArrayLife(args[0]);
-        al.play();
-    }
-
+//    public static void main(String[] args){
+//        if(args.length==0){
+//            System.out.println("You didn't the format as an argument.\nExiting the program.");
+//            System.exit(0);
+//        }
+//        ArrayLife game  = new ArrayLife(args[0]);
+//        game.play();
+//    }
 }
