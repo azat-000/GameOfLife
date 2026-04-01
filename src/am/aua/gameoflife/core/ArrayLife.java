@@ -84,8 +84,7 @@ public final class ArrayLife {
      */
     public boolean getCell(int col, int row) {
         if(col < 0 || col >= width || row < 0 || row >= height){
-            System.out.println("Fatal error.");
-            System.exit(0);
+            return false;
         }
         return world[row][col];
     }
@@ -98,8 +97,7 @@ public final class ArrayLife {
      */
     public void setCell(int col, int row, boolean value) {
         if(col < 0 || col >= width || row < 0 || row >= height){
-            System.out.println("Fatal error.");
-            System.exit(0);
+            return;
         }
         world[row][col] = value;
     }
@@ -184,7 +182,7 @@ public final class ArrayLife {
             if(nextWorld[r][c]){
                 for(int nr=r-1;nr<=r+1;nr++){
                     for(int nc=c-1;nc<=c+1;nc++){
-                        if(nr>0 && nr<height && nc>0 && nc<width){
+                        if(nr>=0 && nr<height && nc>=0 && nc<width){
                             if(!inActiveList[nr][nc]){
                                 inActiveList[nr][nc] = true;
                                 nextActiveRows[nextActiveCounter] = nr;
