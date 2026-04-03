@@ -3,252 +3,95 @@ package am.aua.gameoflife.core;
 import java.util.Scanner;
 
 /**
- * This class is a game engine for the game "Game of Life". It uses the format "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS" given as argument. For example, "Glider:Richard Guy:20:20:1:1:010 001 111". This class uses the Pattern class.
+ * The <code>ArrayLife</code> class represents a Game of Life where the
+ * underlying board is represented by a 2D array of <code>boolean</code> values.
  */
-public final class ArrayLife {
-    //instance vars and constants;
-    private final int width;
-    private final int height;
+public class ArrayLife {
+    // instance variables
+    private int width;
+    private int height;
     private boolean[][] world;
     private Pattern pattern;
-    //other instance vars
-    //the actives and nextActives just keep track the changed cells and their neighbors of the world to simply avoid going through the whole array and checking every cell of it.
-    private int[] activeCols;
-    private int[] activeRows;
-    private int activeCounter;
-    private int[] nextActiveCols;
-    private int[] nextActiveRows;
-    private boolean[][] inActiveList;
-    //characters used
-    private final char liveCell = '\u2588';
-    private final char deadCell = '\u0020';
 
-    //constructors;
-
+    // constructors
     /**
-     *This constructor automatically interacts with the Pattern class
-     * @param format "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS"
+     * Constructs a newly allocated <code>ArrayLife</code> object as specified by
+     * the argument pattern.
+     *
+     * @param format	a pattern specified in <code>String</code> format
      */
-    public ArrayLife(String format){
+    public ArrayLife(String format) {
         pattern = new Pattern(format);
         width = pattern.getWidth();
         height = pattern.getHeight();
         world = new boolean[height][width];
-
-        activeCols = new int[width*height];
-        activeRows = new int[width*height];
-        activeCounter = 0;
-        nextActiveCols = new int[width*height];
-        nextActiveRows = new int[width*height];
-        inActiveList = new boolean[height][width];
-
         pattern.initialise(world);
-        /*
-         * DESIGN NOTE ON EFFICIENCY VS. OOP "SEPARATION OF CONCERNS":
-         * I am aware that sweeping the entire board here is less efficient than
-         * simply calling pattern.getCells().split(" ") and building the initial
-         * active list by only looking at the explicitly provided starting coordinates.
-         * However, parsing that string inside ArrayLife violates the "Separation
-         * of Concerns" required in Part 3. The Pattern class should be the ONLY
-         * class handling string formats. Therefore, I chose to accept THIS ONE-TIME,
-         * full-board sweep during startup. This keeps ArrayLife completely blind to
-         * the string format, while keeping my nextGeneration() engine fully optimized.
-         */
-        for(int i = 0; i<height; i++){
-            for(int j = 0; j<width; j++){
-                //adding the cell and its neighbors to the active list;
-                if(world[i][j]){
-                    for(int r=i-1;r<=i+1;r++){
-                        for(int c=j-1;c<=j+1;c++){
-                            if(r>=0 && r<height && c>=0 && c<width){
-                                if(!inActiveList[r][c]){ //checking for duplicates
-                                    inActiveList[r][c] = true;
-                                    activeRows[activeCounter] = r;
-                                    activeCols[activeCounter] = c;
-                                    activeCounter++;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
-    //..
 
-    /**
-     * This method return the value of the cell
-     * @param col The column of the cell
-     * @param row The row of the cell
-     * @return the value of the cell
-     */
-    public boolean getCell(int col, int row) {
-        if(col < 0 || col >= width || row < 0 || row >= height){
+    // methods
+    private boolean getCell(int col, int row) {
+        if (row < 0 || row >= height || col < 0 || col >= width)
             return false;
-        }
         return world[row][col];
     }
-
-    /**
-     * Assigns the specific cell to the given boolean value
-     * @param col The column of the cell
-     * @param row The row of the cell
-     * @param value The value to be assigned
-     */
-    public void setCell(int col, int row, boolean value) {
-        if(col < 0 || col >= width || row < 0 || row >= height){
-            return;
-        }
-        world[row][col] = value;
+    private void setCell(int col, int row, boolean value) {
+        if (row >= 0 && row < height && col >= 0 && col < width)
+            world[row][col] = value;
     }
-
-    /**
-     * Prints the gameBoard
-     */
-    public void print(){
-        System.out.println(toString());
-    }
-    private int countNeighbors(int col, int row){
-        if(col < 0 || col >= width || row < 0 || row >= height){
-            System.out.println("Fatal error.");
-            System.exit(0);
-        }
-        int  count = 0;
-        boolean leftCellExist = col>0;
-        boolean rightCellExist = col<width-1;
-        boolean upCellExist = row>0;
-        boolean downCellExist = row<height - 1;
-
-        if(leftCellExist && getCell(col-1, row))
-            count++;
-        if(rightCellExist && getCell(col+1, row))
-            count++;
-        if(upCellExist && getCell(col, row-1))
-            count++;
-        if(downCellExist && getCell(col, row+1))
-            count++;
-        if(leftCellExist && upCellExist && getCell(col-1, row-1))
-            count++;
-        if(leftCellExist && downCellExist && getCell(col-1, row+1))
-            count++;
-        if(rightCellExist && upCellExist && getCell(col+1, row-1))
-            count++;
-        if(rightCellExist && downCellExist && getCell(col+1, row+1))
-            count++;
+    private int countNeighbours(int col, int row) {
+        int count = 0;
+        for (int i = -1; i <= 1; i++)
+            for (int j = -1; j <= 1; j++)
+                if (!(i == 0 && j == 0) && getCell(col + j, row + i))
+                    count++;
         return count;
     }
-    private boolean computeCell(int col, int row){
-        if(col < 0 || col >= width || row < 0 || row >= height){
-            System.out.println("Fatal error.");
-            System.exit(0);
-        }
-        int neighborCount = countNeighbors(col, row);
-        if(getCell(col,row)){ //if the cell is live;
-            if(neighborCount < 2){
-                return false;
-            }else if(neighborCount == 2 || neighborCount == 3){
-                return true;
-            }else if(neighborCount > 3)
-                return false;
-        }else{ //if the cell is dead;
-            if(neighborCount == 3)
-                return true;
-            else
-                return false;
-        }
-        return false; //to keep the compiler happy;
+    private boolean computeCell(int col, int row) {
+        int neighbours = countNeighbours(col, row);
+        return neighbours == 3 || (getCell(col, row) && neighbours == 2);
     }
-
-    /**
-     * Updates the game board to the next generation
-     */
-    public void nextGeneration(){
+    private void nextGeneration() {
         boolean[][] nextWorld = new boolean[height][width];
-        int nextActiveCounter = 0;
-
-        for(int i = 0; i<activeCounter; i++){
-            int r = activeRows[i];
-            int c = activeCols[i];
-            nextWorld[r][c] = computeCell(c,r);
-        }
-        for(int i = 0; i<activeCounter; i++){
-            int r = activeRows[i];
-            int c = activeCols[i];
-            inActiveList[r][c] = false;
-        }
-        for(int i = 0; i<activeCounter; i++){
-            int r = activeRows[i];
-            int c = activeCols[i];
-            if(nextWorld[r][c]){
-                for(int nr=r-1;nr<=r+1;nr++){
-                    for(int nc=c-1;nc<=c+1;nc++){
-                        if(nr>=0 && nr<height && nc>=0 && nc<width){
-                            if(!inActiveList[nr][nc]){
-                                inActiveList[nr][nc] = true;
-                                nextActiveRows[nextActiveCounter] = nr;
-                                nextActiveCols[nextActiveCounter] = nc;
-                                nextActiveCounter++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        for (int row = 0; row < height; row++)
+            for (int col = 0; col < width; col++)
+                nextWorld[row][col] = computeCell(col, row);
+//        for (int row = 0; row < height; row++)
+//            for (int col = 0; col < width; col++)
+//                setCell(col, row, nextWorld[row][col]);
         world = nextWorld;
-        int[] tempCols = activeCols;
-        int[] tempRows = activeRows;
-        activeCols = nextActiveCols;
-        activeRows = nextActiveRows;
-        nextActiveCols = tempCols;
-        nextActiveRows = tempRows;
-        activeCounter = nextActiveCounter;
-
     }
-
-    /**
-     * Generates and returns the string representation of the board
-     * @return the string representation of the board
-     */
-    public String toString(){
-        String result = "";
-        for(int row = 0; row < height; row++){
-            for(int col = 0; col < width; col++){
-                result += getCell(col, row)? liveCell: deadCell;
-            }
-            result += "\n";
-        }
-        return result;
+    private void print() {
+        System.out.println(toString());
     }
-
     /**
-     * This method aks for user input and uses the print() method and the nextGeneration() method repeatedly.
+     * Generates a <code>String</code> representation of the game board.
+     *
+     * @return		the <code>String</code> representation of the game board
      */
-    public void play(){
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Enter your choice: s or q.");
-        char userChoice = scan.next().charAt(0);
-        while(userChoice != 'q' && userChoice != 's'){
-            System.out.println("Please enter either s for next generation, or q for stopping.");
-            userChoice = scan.next().charAt(0);
+    public String toString() {
+        final char ALIVE = '\u25AE';
+        final char DEAD = '\u25AF';
+        StringBuilder result = new StringBuilder();
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++)
+                if (getCell(col, row))
+                    result.append(ALIVE);
+                else
+                    result.append(DEAD);
+            result.append("\n");
         }
-        while(userChoice == 's'){
+        return result.toString();
+    }
+    /**
+     * Prints the game board and advances to the next generation, while the user
+     * inputs the character 's'; stops when the user inputs 'q' (or anything other
+     * than 's').
+     */
+    public void play() {
+        Scanner keyboard = new Scanner(System.in);
+        while (keyboard.next().equals("s")) {
             print();
             nextGeneration();
-            userChoice = scan.next().charAt(0);
-            System.out.println("Enter your choice: s or q.");
-            while(userChoice != 'q' && userChoice != 's'){
-                System.out.println("Please enter either s for next generation, or q for stopping.");
-                userChoice = scan.next().charAt(0);
-            }
         }
-
     }
-//    public static void main(String[] args){
-//        if(args.length==0){
-//            System.out.println("You didn't the format as an argument.\nExiting the program.");
-//            System.exit(0);
-//        }
-//        ArrayLife game  = new ArrayLife(args[0]);
-//        game.play();
-//    }
 }
