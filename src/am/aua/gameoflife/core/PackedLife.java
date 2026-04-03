@@ -1,162 +1,107 @@
 package am.aua.gameoflife.core;
 
 import java.util.Scanner;
+
 /**
- * This class is a faster game engine for the game "Game of Life" that works if the width * height of the board is less than or equal to 64. It uses the format "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS" as argument. For example, "Glider:Richard Guy:20:20:1:1:010 001 111". This class uses the Pattern class.
+ * The <code>PackedLife</code> class represents a Game of Life where the
+ * underlying board is represented by a single <code>long</code> value. This
+ * representation is only applicable of boards with up to 64 cells.
  */
 public class PackedLife {
-
-    //instance variables/constants;
+    // instance variables
     private int width;
     private int height;
     private long world;
     private Pattern pattern;
-    private final char liveCell = '\u2588';
-    private final char deadCell = '\u0020';
-    //constructors;
+
+    // constructors
     /**
-     *This constructor automatically interacts with the Pattern class
-     * @param format "NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS"
+     * Constructs a newly allocated <code>PackedLife</code> object as specified by
+     * the argument pattern.
+     *
+     * @param format	a pattern specified in <code>String</code> format
      */
-    public PackedLife(String format){
+    public PackedLife(String format) {
         pattern = new Pattern(format);
         width = pattern.getWidth();
         height = pattern.getHeight();
-        if(width*height>64){
-            System.out.println("Width * height should be <= to 64");
-            System.out.println("Exiting the program.");
-            System.exit(0);
-        }
-        world = pattern.initialize();
+        world = pattern.initialise();
     }
-    //accessors;
-    /**
-     * This method return the value of the cell
-     * @param col The column of the cell
-     * @param row The row of the cell
-     * @return the value of the cell
-     */
-    public boolean getCell(int col, int row){
-        if (row < 0 || row >= height)
-            return false;
-        if (col < 0 || col >= width)
+
+    // methods
+    private boolean getCell(int col, int row) {
+        if (row < 0 || row >= height || col < 0 || col >= width)
             return false;
         return ((world >>> (row * width + col)) & 1L) == 1L;
     }
-    //mutators
-    /**
-     * Assigns the specific cell to the given boolean value
-     * @param col The column of the cell
-     * @param row The row of the cell
-     * @param value The value to be assigned
-     */
-    public void setCell(int col, int row, boolean value){
-        if (row < 0 || row >= height)
-            return;
-        if (col < 0 || col >= width)
-            return;
-        if(value)
-            world |= (1L << (row * width + col));
-        else
-            world &= ~(1L << (row * width + col));
+    private void setCell(int col, int row, boolean value) {
+        if (row >= 0 && row < height && col >= 0 && col < width) {
+            if (value)
+                world |= 1L << (row * width + col);
+            else
+                world &= ~(1L << (row * width + col));
+        }
     }
-    private long setCell(long newWorld,int col, int row, boolean value){
-        if(value)
-            newWorld |= (1L << (row * width + col));
-        else
-            newWorld &= ~(1L << (row * width + col));
-        return newWorld;
+    private int countNeighbours(int col, int row) {
+        int count = 0;
+        for (int i = -1; i <= 1; i++)
+            for (int j = -1; j <= 1; j++)
+                if (!(i == 0 && j == 0) && getCell(col + j, row + i))
+                    count++;
+        return count;
     }
-    //other
-    /**
-     * Prints the gameBoard;
-     */
-    public void print(){
-        System.out.print(toString());
+    private boolean computeCell(int col, int row) {
+        int neighbours = countNeighbours(col, row);
+        return neighbours == 3 || (getCell(col, row) && neighbours == 2);
     }
-
+    private void nextGeneration() {
+        long nextWorld = 0L;
+        for (int row = 0; row < height; row++)
+            for (int col = 0; col < width; col++)
+                if (computeCell(col, row))
+                    nextWorld |= 1L << (row * width + col);
+        world = nextWorld;
+    }
+    private void print() {
+        System.out.println(toString());
+    }
     /**
-     * returns the string representation of the board
-     * @return the string representation of the board
+     * Generates a <code>String</code> representation of the game board.
+     *
+     * @return		the <code>String</code> representation of the game board
      */
-    public String toString(){
-        StringBuilder result = new StringBuilder(128);
-        for(int row = 0; row < height; row++){
-            for(int col = 0; col < width; col++){
-                result.append(getCell(col, row)? liveCell: deadCell);
-            }
+    public String toString() {
+        final char ALIVE = '\u25AE';
+        final char DEAD = '\u25AF';
+        StringBuilder result = new StringBuilder();
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++)
+                if (getCell(col, row))
+                    result.append(ALIVE);
+                else
+                    result.append(DEAD);
             result.append("\n");
         }
         return result.toString();
     }
-    private int countNeighbours(int col, int row){
-        if (row < 0 || row >= height)
-            return 0;
-        if (col < 0 || col >= width)
-            return 0;
-        int count = 0;
-        for(int r = row-1; r <= row+1; r++){
-            for(int c = col-1; c <= col+1; c++){
-                if(r>=0 && r<height && c>=0 && c<width){
-                    if(getCell(c,r))
-                        count++;
-                }
-            }
-        }
-        if(getCell(col, row)) count--;
-        return count;
-    }
-    private boolean computeCell(int col, int row){
-        if(col < 0 || col >= width)
-            return false;
-        if(row < 0 || row >= height)
-            return false;
-        int neighbours = countNeighbours(col, row);
-        if(getCell(col,row))
-            return neighbours == 2 || neighbours == 3;
-        else
-            return neighbours == 3;
-    }
     /**
-     * Updates the game board to the next generation
+     * Prints the game board and advances to the next generation, while the user
+     * inputs the character 's'; stops when the user inputs 'q' (or anything other
+     * than 's').
      */
-    public void nextGeneration(){
-        long newWorld = 0;
-        for(int row = 0; row < height; row++){
-            for(int col = 0; col < width; col++){
-                newWorld = setCell(newWorld, col, row, computeCell(col, row));
-            }
-        }
-        world = newWorld;
-    }
-    /**
-     * This method aks for user input and uses the print() method and the nextGeneration() method repeatedly.
-     */
-    public void play(){
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Enter your choice: s or q.");
-        char userChoice = scan.next().charAt(0);
-        while(userChoice != 'q' && userChoice != 's'){
-            System.out.println("Please enter either s for next generation, or q for stopping.");
-            userChoice = scan.next().charAt(0);
-        }
-        while(userChoice == 's'){
+    public void play() {
+        Scanner keyboard = new Scanner(System.in);
+        while (keyboard.next().equals("s")) {
             print();
             nextGeneration();
-            userChoice = scan.next().charAt(0);
-            System.out.println("Enter your choice: s or q.");
-            while(userChoice != 'q' && userChoice != 's'){
-                System.out.println("Please enter either s for next generation, or q for stopping.");
-                userChoice = scan.next().charAt(0);
-            }
         }
     }
-//    public static void main(String[] args){
-//        if(args.length==0){
-//            System.out.println("You didn't the format as an argument.\nExiting the program.");
-//            System.exit(0);
-//        }
-//        PackedLife game  = new PackedLife(args[0]);
-//        game.play();
-//    }
+    
+    /*
+    // testing
+    public static void main(String[] args) {
+        PackedLife pl = new PackedLife(args[0]);
+        pl.play();
+    }
+    */
 }
