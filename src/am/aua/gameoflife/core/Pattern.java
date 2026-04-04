@@ -8,14 +8,13 @@ package am.aua.gameoflife.core;
  */
 public class Pattern {
     // instance variables
-    private String name;
-    private String author;
-    private int width;
-    private int height;
-    private int startCol;
-    private int startRow;
     private String cells;
-
+    private int startRow;
+    private int startCol;
+    private int height;
+    private int width;
+    private String author;
+    private String name;
     // constructors
     /**
      * Constructs a newly allocated <code>Pattern</code> object as specified by
@@ -92,33 +91,31 @@ public class Pattern {
         return cells;
     }
     /**
-     * Updates the values in the 2D array representing the state of 'world' as
-     * expressed by the contents of the field 'cells'
-     *
-     * @param world	the <code>boolean[][]</code> representation of the 'world'
+     * Generates the initial state of the world.
+     * @param world The board.
      */
-    public void initialise(boolean[][] world) {
+    public void initialise(World world) {
         String[] rows = cells.split(" ");
         for (int i = 0; i < rows.length; i++)
             for (int j = 0; j < rows[i].length(); j++)
                 if (rows[i].charAt(j) == '1')
-                    world[startRow + i][startCol + j] = true;
+                    world.setCell(startCol+j, startRow+i, true);
     }
     /**
-     * Generates the state of 'world', as expressed by the contents of the field
-     * 'cells', in the form of a long integer
-     *
-     * @return		the <code>long</code> representation of the 'world'
+     * Returns the description of the pattern.
+     * @return the description of the pattern.
      */
-    public long initialise() {
-        long world = 0L;
-        String[] rows = cells.split(" ");
-        for (int i = 0; i < rows.length; i++)
-            for (int j = 0; j < rows[i].length(); j++)
-                if (rows[i].charAt(j) == '1')
-                    world |= 1L << ((startRow + i) * width + (startCol + j));
-        return world;
+    @Override
+    public String toString() {
+        return "Name: "+name+" Author: "+author+" Width: "+width+" Height: "+height+" StartCol: "+startCol+" StartRow: "+startRow+" Cells: "+cells;
     }
+    public boolean equals(Object otherObject){
+        if(otherObject == null) return false;
+        if(this.getClass() != otherObject.getClass()) return false;
+        Pattern otherPattern = (Pattern)otherObject;
+        return name.equals(otherPattern.name) && author.equals(otherPattern.author) && width == otherPattern.width && height == otherPattern.height && startCol == otherPattern.startCol && startRow == otherPattern.startRow && cells.equals(otherPattern.cells);
+    }
+
 
     /*
     // testing
