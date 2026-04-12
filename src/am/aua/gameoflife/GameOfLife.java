@@ -19,13 +19,10 @@ public class GameOfLife {
      * @param w The world of the game.
      */
     public GameOfLife(World w) {
-        //CAN YOU PLEASE TELL ME IN THE FEEDBACK WHICH VERSION AM I SUPPOSED TO USE HERE? THE FIRST ONE MIGHT CAUSE PRIVACY LEAKS IF NOT USED PROPERLY IN THE MAIN METHOD. HOWEVER, THE COMMENTED ONE DISCOURAGES POLYMORPHISM AND I AM NOT ALLOWED TO USE OTHER METHODS BECAUSE IN THE HOMEWORK PDF, THE UML DIAGRAM SAYS THE CLASSES SHOULD LOOK LIKE IT IN THE END.
-        this.world = w;
-//        if (w instanceof PackedWorld) {
-//            world = new PackedWorld((PackedWorld) w);
-//        } else if (w instanceof ArrayWorld) {
-//            world = new ArrayWorld((ArrayWorld) w);
-//        }
+        if (w.getClass() == ArrayWorld.class)
+            world = new ArrayWorld((ArrayWorld) w);
+        else
+            world = new PackedWorld((PackedWorld) w);
     }
     //methods
     private void print(){
@@ -50,11 +47,12 @@ public class GameOfLife {
      */
     public static void main(String[] args) {
         World w = null;
-        if(args.length == 1) w = new ArrayWorld(args[0]);
-        else if(args.length == 2){
-            if(args[0].equals("--array")) w = new ArrayWorld(args[1]);
-            else if(args[0].equals("--packed")) w = new PackedWorld(args[1]);
-        }
+        if (args.length == 1)
+            w = new ArrayWorld(args[0]);
+        else if (args[0].equals("--array"))
+            w = new ArrayWorld(args[1]);
+        else
+            w = new PackedWorld(args[1]);
         GameOfLife gol = new GameOfLife(w);
         gol.play();
     }

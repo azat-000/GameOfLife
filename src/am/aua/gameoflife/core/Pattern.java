@@ -107,13 +107,19 @@ public class Pattern {
      */
     @Override
     public String toString() {
-        return "Name: "+name+" Author: "+author+" Width: "+width+" Height: "+height+" StartCol: "+startCol+" StartRow: "+startRow+" Cells: "+cells;
+        return name + ":" + author + ":" + width + ":" + height + ":"
+                + startCol + ":" + startRow + ":" + cells;
     }
-    public boolean equals(Object otherObject){
-        if(otherObject == null) return false;
-        if(this.getClass() != otherObject.getClass()) return false;
-        Pattern otherPattern = (Pattern)otherObject;
-        return name.equals(otherPattern.name) && author.equals(otherPattern.author) && width == otherPattern.width && height == otherPattern.height && startCol == otherPattern.startCol && startRow == otherPattern.startRow && cells.equals(otherPattern.cells);
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Pattern op = (Pattern) o;
+        return name.equals(op.name) && author.equals(op.author)
+                && width == op.width && height == op.height
+                && startCol == op.startCol && startRow == op.startRow
+                && cells.equals(op.cells);
     }
 
 

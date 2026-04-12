@@ -13,9 +13,8 @@ public class PackedWorld extends World{
      */
     public PackedWorld(String format) {
         super(format);
-        if(getWidth() * getHeight() > 64){
-            System.out.println("The board cannot handle more than 64 cells");
-            System.out.println("Aborting the program");
+        if (getHeight() * getWidth() > 64) {
+            System.out.println("Board too large for PackedWorld. Aborting.");
             System.exit(0);
         }
         getPattern().initialise(this);
@@ -23,11 +22,11 @@ public class PackedWorld extends World{
 
     /**
      * Copy constructor.
-     * @param packedWorld The object to be copied.
+     * @param pw The object to be copied.
      */
-    public PackedWorld(PackedWorld packedWorld){
-        super(packedWorld);
-        this.world = packedWorld.world;
+    public PackedWorld(PackedWorld pw) {
+        super(pw);
+        world = pw.world;
     }
 
     /**
@@ -72,15 +71,16 @@ public class PackedWorld extends World{
 
     /**
      *
-     * @param otherObject   the reference object with which to compare.
+     * @param o   the reference object with which to compare.
      * @return True if equal. Otherwise, false.
      */
     @Override
-    public boolean equals(Object otherObject){
-        if(otherObject == null) return false;
-        if(getClass() != otherObject.getClass()) return false;
-        PackedWorld otherPackedWorld = (PackedWorld) otherObject;
-        if(!super.equals(otherPackedWorld)) return false;
-        return this.world == otherPackedWorld.world;
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        PackedWorld aw = (PackedWorld) o;
+        return super.equals(o) && world == aw.world;
     }
 }

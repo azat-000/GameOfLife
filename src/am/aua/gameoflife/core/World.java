@@ -113,16 +113,18 @@ public abstract class World {
 
     /**
      *
-     * @param other   the reference object with which to compare.
+     * @param o   the reference object with which to compare.
      * @return True if equals. Otherwise, false.
      */
     @Override
-    public boolean equals(Object other){
-        if(other == null) return false;
-        if(this.getClass() != other.getClass()) return false;
-        World otherWorld = (World)other;
-        //error code still
-        return generation == otherWorld.generation && pattern.equals(otherWorld.pattern);
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        World otherWorld = (World) o;
+        return generation == otherWorld.generation
+                && pattern.equals(otherWorld.pattern);
     }
 
     /**
@@ -134,8 +136,8 @@ public abstract class World {
         final char ALIVE = '\u25AE';
         final char DEAD = '\u25AF';
         StringBuilder result = new StringBuilder();
-        for (int row = 0; row < pattern.getHeight(); row++) {
-            for (int col = 0; col < pattern.getWidth(); col++)
+        for (int row = 0; row < getHeight(); row++) {
+            for (int col = 0; col < getWidth(); col++)
                 if (getCell(col, row))
                     result.append(ALIVE);
                 else
