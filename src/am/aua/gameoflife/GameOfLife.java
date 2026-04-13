@@ -4,6 +4,7 @@ package am.aua.gameoflife;
 import am.aua.gameoflife.core.ArrayWorld;
 import am.aua.gameoflife.core.PackedWorld;
 import am.aua.gameoflife.core.World;
+import am.aua.gameoflife.exceptions.PatternFormatException;
 
 import java.util.Scanner;
 
@@ -47,12 +48,17 @@ public class GameOfLife {
      */
     public static void main(String[] args) {
         World w = null;
-        if (args.length == 1)
-            w = new ArrayWorld(args[0]);
-        else if (args[0].equals("--array"))
-            w = new ArrayWorld(args[1]);
-        else
-            w = new PackedWorld(args[1]);
+        try{
+            if (args.length == 1)
+                w = new ArrayWorld(args[0]);
+            else if (args[0].equals("--array"))
+                w = new ArrayWorld(args[1]);
+            else
+                w = new PackedWorld(args[1]);
+        }catch (PatternFormatException e){
+            System.out.println(e.getMessage());
+            System.exit(0);
+        }
         GameOfLife gol = new GameOfLife(w);
         gol.play();
     }

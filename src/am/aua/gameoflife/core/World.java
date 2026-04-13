@@ -1,5 +1,7 @@
 package am.aua.gameoflife.core;
 
+import am.aua.gameoflife.exceptions.PatternFormatException;
+
 import java.util.Scanner;
 
 /**
@@ -8,12 +10,13 @@ import java.util.Scanner;
 public abstract class World {
     private Pattern pattern;
     private int generation;
+    enum Cell {ALIVE, DEAD}
     //constructors
     /**
      *
      * @param format The format of the game/board.
      */
-    protected World(String format){
+    protected World(String format) throws PatternFormatException {
         pattern = new Pattern(format);
         generation = 0;
     }
@@ -33,7 +36,7 @@ public abstract class World {
      * Returns the width of the board.
      * @return the width of the board.
      */
-    public int getWidth(){
+    public final int getWidth(){
         return pattern.getWidth();
     }
 
@@ -41,7 +44,7 @@ public abstract class World {
      * Returns the height of the board.
      * @return the height of the board.
      */
-    public int getHeight(){
+    public final int getHeight(){
         return pattern.getHeight();
     }
 
@@ -49,7 +52,7 @@ public abstract class World {
      * Returns the generation count of the game.
      * @return the generation count of the game.
      */
-    public int getGenerationCount(){
+    public final int getGenerationCount(){
         return generation;
     }
 
@@ -57,17 +60,16 @@ public abstract class World {
      * Returns the pattern of the game/board.
      * @return the pattern of the game/board.
      */
-    public Pattern getPattern(){
+    public final Pattern getPattern(){
         return pattern;
     }
 
     /**
      * Changes the board to the next generation
      */
-    public void nextGeneration(){
+    public final void nextGeneration(){
         nextGenerationImpl();
         generation++;
-
     }
 
     /**
@@ -81,7 +83,7 @@ public abstract class World {
      * @param row The row of the cell.
      * @return The cell condition.
      */
-    public abstract boolean getCell(int col, int row);
+    public abstract Cell getCell(int col, int row);
 
     /**
      * Changes the cell condition.
@@ -89,13 +91,13 @@ public abstract class World {
      * @param row The row of the cell.
      * @param value The cell condition.
      */
-    abstract void setCell(int col, int row, boolean value);
+    abstract void setCell(int col, int row, Cell value);
 
-    private int countNeighbours(int col, int row) {
+    private final int countNeighbours(int col, int row) {
         int count = 0;
         for (int i = -1; i <= 1; i++)
             for (int j = -1; j <= 1; j++)
-                if (!(i == 0 && j == 0) && getCell(col + j, row + i))
+                if (!(i == 0 && j == 0) && getCell(col + j, row + i) ==  Cell.ALIVE)
                     count++;
         return count;
     }
@@ -106,9 +108,11 @@ public abstract class World {
      * @param row The row of the cell.
      * @return the condition of the cell for the next generation.
      */
-    protected boolean computeCell(int col, int row) {
+    protected final Cell computeCell(int col, int row) {
         int neighbours = countNeighbours(col, row);
-        return neighbours == 3 || (getCell(col, row) && neighbours == 2);
+        if (neighbours == 3 || ((getCell(col, row) == Cell.ALIVE) && neighbours == 2))
+            return Cell.ALIVE;
+        return Cell.DEAD;
     }
 
     /**
@@ -138,7 +142,7 @@ public abstract class World {
         StringBuilder result = new StringBuilder();
         for (int row = 0; row < getHeight(); row++) {
             for (int col = 0; col < getWidth(); col++)
-                if (getCell(col, row))
+                if (getCell(col, row) == Cell.ALIVE)
                     result.append(ALIVE);
                 else
                     result.append(DEAD);

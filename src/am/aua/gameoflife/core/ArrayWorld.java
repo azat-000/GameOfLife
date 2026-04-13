@@ -1,23 +1,25 @@
 package am.aua.gameoflife.core;
 
+import am.aua.gameoflife.exceptions.PatternFormatException;
+
 /**
  * The board of the game represented as 2D arrays. Works for any size.
  */
 public class ArrayWorld extends World {
-    private boolean[][] world;
+    private Cell[][] world;
     //constructors
 
     /**
      * Constructs the board given the format.
      * @param format the format of the board.
      */
-    public ArrayWorld(String format) {
+    public ArrayWorld(String format) throws PatternFormatException {
         super(format);
-        world = new boolean[getHeight()][getWidth()];
+        world = new Cell[getHeight()][getWidth()];
         //optional: false is the default value
         for (int row = 0; row < world.length; row++)
             for (int col = 0; col < world[row].length; col++)
-                world[row][col] = false;
+                world[row][col] = Cell.DEAD;
         getPattern().initialise(this);
     }
 
@@ -27,7 +29,7 @@ public class ArrayWorld extends World {
      */
     public ArrayWorld(ArrayWorld aw) {
         super(aw);
-        world = new boolean[getHeight()][getWidth()];
+        world = new Cell[getHeight()][getWidth()];
         for (int row = 0; row < world.length; row++)
             for (int col = 0; col < world[row].length; col++)
                 world[row][col] = aw.world[row][col];
@@ -41,9 +43,9 @@ public class ArrayWorld extends World {
      * @return the cell condition.
      */
     @Override
-    public boolean getCell(int col, int row) {
+    public final Cell getCell(int col, int row) {
         if (row < 0 || row >= getHeight() || col < 0 || col >= getWidth())
-            return false;
+            return Cell.DEAD;
         return world[row][col];
     }
     /**
@@ -53,7 +55,7 @@ public class ArrayWorld extends World {
      * @param value The cell condition.
      */
     @Override
-    void setCell(int col, int row, boolean value) {
+    final void setCell(int col, int row, Cell value) {
         if (row >= 0 && row < getHeight() && col >= 0 && col < getWidth())
             world[row][col] = value;
     }
@@ -61,10 +63,10 @@ public class ArrayWorld extends World {
      * Used in nextGeneration to change the board to the next generation.
      */
     @Override
-    protected void nextGenerationImpl() {
-        boolean[][] nextWorld = new boolean[world.length][];
+    protected final void nextGenerationImpl() {
+        Cell[][] nextWorld = new Cell[world.length][];
         for (int row = 0; row < nextWorld.length; row++) {
-            nextWorld[row] = new boolean[world[row].length];
+            nextWorld[row] = new Cell[world[row].length];
             for (int col = 0; col < nextWorld[row].length; col++)
                 nextWorld[row][col] = computeCell(col, row);
         }
@@ -77,7 +79,7 @@ public class ArrayWorld extends World {
      * @return True if equals. Otherwise, false.
      */
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())

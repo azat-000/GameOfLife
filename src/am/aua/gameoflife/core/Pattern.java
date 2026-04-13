@@ -1,5 +1,7 @@
 package am.aua.gameoflife.core;
 
+import am.aua.gameoflife.exceptions.PatternFormatException;
+
 /**
  * The <code>Pattern</code> class represents a Game of Life pattern that
  * supports a <code>String</code> specification format like:
@@ -22,14 +24,30 @@ public class Pattern {
      *
      * @param format	a pattern specified in <code>String</code> format
      */
-    public Pattern(String format) {
+    public Pattern(String format) throws PatternFormatException {
+        if(format.isEmpty()) throw new PatternFormatException("Please specify a pattern.");
         String[] tokens = format.split(":");
+        if(tokens.length!=7){
+            throw new PatternFormatException("Invalid pattern format: Incorrect number of fields in pattern (found "+tokens.length+").");
+        }
         name = tokens[0];
         author = tokens[1];
-        width = Integer.parseInt(tokens[2]);
-        height = Integer.parseInt(tokens[3]);
-        startCol = Integer.parseInt(tokens[4]);
-        startRow = Integer.parseInt(tokens[5]);
+        try{width = Integer.parseInt(tokens[2]);}
+        catch(NumberFormatException e){
+            throw new PatternFormatException("Invalid pattern format: Could not interpret the width field as a number (’"+tokens[2]+"’ given).");
+        }
+        try{height = Integer.parseInt(tokens[3]);}
+        catch(NumberFormatException e){
+            throw new PatternFormatException("Invalid pattern format: Could not interpret the height field as a number (’"+tokens[3]+"’ given).");
+        }
+        try{startCol = Integer.parseInt(tokens[4]);}
+        catch (NumberFormatException e){
+            throw new PatternFormatException("Invalid pattern format: Could not interpret the startX field as a number (’"+tokens[4]+"’ given).");
+        }
+        try{startRow = Integer.parseInt(tokens[5]);}
+        catch(NumberFormatException e){
+            throw new PatternFormatException("Invalid pattern format: Could not interpret the startY field as a number (’"+tokens[5]+"’ given).");
+        }
         cells = tokens[6];
     }
 
@@ -39,7 +57,7 @@ public class Pattern {
      *
      * @return		the <code>String</code> name
      */
-    public String getName() {
+    public final String getName() {
         return name;
     }
     /**
@@ -47,7 +65,7 @@ public class Pattern {
      *
      * @return		the <code>String</code> author
      */
-    public String getAuthor() {
+    public final String getAuthor() {
         return author;
     }
     /**
@@ -55,7 +73,7 @@ public class Pattern {
      *
      * @return		the <code>int</code> width
      */
-    public int getWidth() {
+    public final int getWidth() {
         return width;
     }
     /**
@@ -63,7 +81,7 @@ public class Pattern {
      *
      * @return		the <code>int</code> height
      */
-    public int getHeight() {
+    public final int getHeight() {
         return height;
     }
     /**
@@ -71,7 +89,7 @@ public class Pattern {
      *
      * @return		the <code>int</code> start column
      */
-    public int getStartCol() {
+    public final int getStartCol() {
         return startCol;
     }
     /**
@@ -79,7 +97,7 @@ public class Pattern {
      *
      * @return		the <code>int</code> start row
      */
-    public int getStartRow() {
+    public final int getStartRow() {
         return startRow;
     }
     /**
@@ -87,30 +105,37 @@ public class Pattern {
      *
      * @return		the <code>String</code> cells
      */
-    public String getCells() {
+    public final String getCells() {
         return cells;
     }
     /**
      * Generates the initial state of the world.
      * @param world The board.
      */
-    public void initialise(World world) {
+    public final void initialise(World world) throws PatternFormatException{
+        if (cells.contains("  ")) {
+            throw new PatternFormatException("Invalid pattern format: Malformed pattern ’" + cells + "’.");
+        }
         String[] rows = cells.split(" ");
         for (int i = 0; i < rows.length; i++)
-            for (int j = 0; j < rows[i].length(); j++)
+            for (int j = 0; j < rows[i].length(); j++){
+                if(rows[i].charAt(j) != '0' && rows[i].charAt(j) != '1')
+                    throw new PatternFormatException("Invalid pattern format: Malformed pattern ’"+cells+"’.");
                 if (rows[i].charAt(j) == '1')
-                    world.setCell(startCol+j, startRow+i, true);
+                    world.setCell(startCol+j, startRow+i, World.Cell.ALIVE);
+            }
     }
     /**
      * Returns the description of the pattern.
      * @return the description of the pattern.
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return name + ":" + author + ":" + width + ":" + height + ":"
                 + startCol + ":" + startRow + ":" + cells;
     }
-    public boolean equals(Object o) {
+    @Override
+    public final boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())
