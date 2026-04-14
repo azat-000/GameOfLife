@@ -32,6 +32,21 @@ public class PackedWorld extends World{
     }
 
     /**
+     *
+     * @param pattern -- the pattern of the game board.
+     * @throws PatternFormatException
+     */
+    public PackedWorld(Pattern pattern) throws PatternFormatException{
+        super(pattern);
+        if (getHeight() * getWidth() > 64) {
+            System.out.println("Board too large for PackedWorld. Aborting.");
+            System.exit(0);
+        }
+        getPattern().initialise(this);
+
+    }
+
+    /**
      * Returns the cell condition.
      * @param col The column of the cell.
      * @param row The row of the cell.

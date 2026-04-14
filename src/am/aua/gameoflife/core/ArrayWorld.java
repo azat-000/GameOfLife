@@ -34,6 +34,17 @@ public class ArrayWorld extends World {
             for (int col = 0; col < world[row].length; col++)
                 world[row][col] = aw.world[row][col];
     }
+
+    /**
+     *
+     * @param pattern -- the pattern of the game board.
+     * @throws PatternFormatException
+     */
+    public ArrayWorld(Pattern pattern) throws PatternFormatException{
+        super(pattern);
+        world = new Cell[getHeight()][getWidth()];
+        getPattern().initialise(this);
+    }
     //methods
 
     /**

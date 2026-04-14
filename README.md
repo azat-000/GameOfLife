@@ -19,3 +19,5 @@
 ### void loadFromURL(String url) -- exception that is a descendant of IOException comes from the URL constructor, doesn't catch. Moreover, comes from other methods as well.
 ### void loadFromDisk(String filename) -- exception that is a descendant of IOException comes from the FileReader constructor, doesn't catch. Exceptions from other methods may also come.
 ### static void main(String args[]) -- exception comes from the PatternStore constructor, doesn't catch.
+##  In your report, explain which method and with which parameters (number and types) you can use for this task.
+### public static void sort(Object[] a) -- Since String is an object and String implements the Comparable interface, as required by the method, this methods can be used.

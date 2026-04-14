@@ -30,6 +30,15 @@ public abstract class World {
         generation = world.generation;
 
     }
+
+    /**
+     *
+     * @param pattern -- the pattern of the game board.
+     */
+    protected World(Pattern pattern){
+        this.pattern = pattern;
+        generation = 0;
+    }
     //methods
 
     /**
