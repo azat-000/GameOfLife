@@ -8,7 +8,7 @@ import am.aua.gameoflife.exceptions.PatternFormatException;
  * NAME:AUTHOR:WIDTH:HEIGHT:STARTUPPERCOL:STARTUPPERROW:CELLS
  * For example, "Glider:Richard Guy:20:20:1:1:01 001 111"
  */
-public class Pattern {
+public class Pattern implements Comparable<Pattern> {
     // instance variables
     private String cells;
     private int startRow;
@@ -145,6 +145,10 @@ public class Pattern {
                 && width == op.width && height == op.height
                 && startCol == op.startCol && startRow == op.startRow
                 && cells.equals(op.cells);
+    }
+
+    public int compareTo(Pattern o){
+        return getName().compareTo(o.getName());
     }
 
 

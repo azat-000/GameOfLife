@@ -103,4 +103,16 @@ public class PackedWorld extends World{
         PackedWorld aw = (PackedWorld) o;
         return super.equals(o) && world == aw.world;
     }
+    @Override
+    public PackedWorld clone(){
+        return (PackedWorld) super.clone();
+    }
+    //testing the copy constructor
+//    public static void main(String[] args) throws PatternFormatException {
+//        PackedWorld first = new PackedWorld("nm:ss:2:2:0:0:10 10");
+//        PackedWorld second = new PackedWorld(first);
+//        System.out.println(first.equals(second));
+//        second.setCell(0,0, Cell.DEAD);
+//        System.out.println((first.equals(second)));
+//    }
 }

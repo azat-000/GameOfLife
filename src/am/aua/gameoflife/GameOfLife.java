@@ -11,6 +11,8 @@ import am.aua.gameoflife.exceptions.PatternFormatException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 
 /**
@@ -19,6 +21,7 @@ import java.io.InputStreamReader;
 public class GameOfLife {
     private World world;
     private PatternStore store;
+    private ArrayList<World> cachedWorlds; //Note that it must be cleared whenever the pattern played changes
     //constructors
 
     /**
@@ -27,6 +30,7 @@ public class GameOfLife {
      */
     public GameOfLife(PatternStore ps) {
         store = ps;
+        cachedWorlds = new ArrayList<>();
 //        if (w.getClass() == ArrayWorld.class)
 //            world = new ArrayWorld((ArrayWorld) w);
 //        else
@@ -36,6 +40,21 @@ public class GameOfLife {
     private void print(){
         System.out.println("- "+world.getGenerationCount());
         System.out.println(world.toString());
+    }
+
+    private World copyWorld(boolean useCloning){
+        if(!useCloning){
+            try{
+                Class<? extends World> clazz = world.getClass();
+                Constructor<? extends World> copyConstructor = clazz.getConstructor(clazz);
+                return copyConstructor.newInstance(world);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }else{
+            return world.clone();
+        }
+
     }
 
     /**
@@ -49,28 +68,45 @@ public class GameOfLife {
         while(!response.equals("q")){
             response = in.readLine();
             System.out.println(response);
-            if(response.equals("f")){
+            if(response.equals("f") || response.equals("b")){
                 if(world == null)
                     System.out.println("Please select a pattern to play (l to list):");
                 else{
-                    world.nextGeneration();
+                    if(response.equals("f")){
+                        if(world.getGenerationCount() == cachedWorlds.size()-1){
+                            World nextSnapshot = copyWorld(true);
+                            nextSnapshot.nextGeneration();
+                            cachedWorlds.add(nextSnapshot);
+                            world = nextSnapshot;
+                        }else {
+                            world = cachedWorlds.get(world.getGenerationCount() + 1);
+                        }
+                    }
+                    if(response.equals("b")){
+                        if(world.getGenerationCount()>0)
+                            world=cachedWorlds.get(world.getGenerationCount()-1);
+                    }
                     print();
                 }
-            }else if(response.equals("l")){
-                Pattern[] names = store.getPatterns();
+            }
+            else if(response.equals("l")){
+                ArrayList<Pattern> names = store.getPatternsNameSorted();
                 int i = 0;
                 for(Pattern p:names){
                     System.out.println(i+" "+p.getName()+" ("+p.getAuthor()+")" );
                     i++;
                 }
             }else if(response.startsWith("p")){
-                Pattern[] names = store.getPatterns();
+                cachedWorlds.clear();
+                ArrayList<Pattern> names = store.getPatternsNameSorted();
                 int patternNum = Integer.parseInt(response.substring(2));
-                Pattern assosiatedPattern = names[patternNum];
+                Pattern assosiatedPattern = names.get(patternNum);
                 if(assosiatedPattern.getWidth() * assosiatedPattern.getHeight() > 64)
                     world = new ArrayWorld(assosiatedPattern);
                 else
                     world = new PackedWorld(assosiatedPattern);
+                cachedWorlds.add(copyWorld(true));
+
                 print();
             }
         }

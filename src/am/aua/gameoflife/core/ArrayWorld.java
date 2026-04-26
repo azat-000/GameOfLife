@@ -7,6 +7,7 @@ import am.aua.gameoflife.exceptions.PatternFormatException;
  */
 public class ArrayWorld extends World {
     private Cell[][] world;
+    private final Cell[] deadRow;
     //constructors
 
     /**
@@ -16,12 +17,17 @@ public class ArrayWorld extends World {
     public ArrayWorld(String format) throws PatternFormatException {
         super(format);
         world = new Cell[getHeight()][getWidth()];
-        //optional: false is the default value
+        deadRow = new Cell[getWidth()];
+        for(int i = 0; i<deadRow.length; i++)
+            deadRow[i] = Cell.DEAD;
         for (int row = 0; row < world.length; row++)
             for (int col = 0; col < world[row].length; col++)
                 world[row][col] = Cell.DEAD;
         getPattern().initialise(this);
+        for(int row = 0; row<world.length; row ++)
+            if(isRowDead(row)) world[row] = deadRow;
     }
+
 
     /**
      * Copy constructor.
@@ -30,9 +36,13 @@ public class ArrayWorld extends World {
     public ArrayWorld(ArrayWorld aw) {
         super(aw);
         world = new Cell[getHeight()][getWidth()];
+        deadRow = aw.deadRow;
         for (int row = 0; row < world.length; row++)
-            for (int col = 0; col < world[row].length; col++)
-                world[row][col] = aw.world[row][col];
+            if(aw.world[row] == deadRow)
+                world[row] = deadRow;
+            else
+                for (int col = 0; col < world[row].length; col++)
+                    world[row][col] = aw.world[row][col];
     }
 
     /**
@@ -43,7 +53,15 @@ public class ArrayWorld extends World {
     public ArrayWorld(Pattern pattern) throws PatternFormatException{
         super(pattern);
         world = new Cell[getHeight()][getWidth()];
+        deadRow = new Cell[getWidth()];
+        for(int i = 0; i<deadRow.length; i++)
+            deadRow[i] = Cell.DEAD;
+        for (int row = 0; row < world.length; row++)
+            for (int col = 0; col < world[row].length; col++)
+                world[row][col] = Cell.DEAD;
         getPattern().initialise(this);
+        for(int row = 0; row<world.length; row ++)
+            if(isRowDead(row)) world[row] = deadRow;
     }
     //methods
 
@@ -69,6 +87,11 @@ public class ArrayWorld extends World {
     final void setCell(int col, int row, Cell value) {
         if (row >= 0 && row < getHeight() && col >= 0 && col < getWidth())
             world[row][col] = value;
+    }
+    private boolean isRowDead(int row){
+        for(Cell each : world[row])
+            if(each == Cell.ALIVE) return false;
+        return true;
     }
     /**
      * Used in nextGeneration to change the board to the next generation.
@@ -104,4 +127,25 @@ public class ArrayWorld extends World {
                     return false;
         return true;
     }
+    @Override
+    public ArrayWorld clone(){
+        ArrayWorld copy = (ArrayWorld)super.clone();
+        Cell[][] worldCopy = new Cell[getHeight()][getWidth()];
+        for (int row = 0; row < world.length; row++)
+            if(world[row] == deadRow)
+                worldCopy[row] = deadRow;
+            else
+                for (int col = 0; col < world[row].length; col++)
+                    worldCopy[row][col] = world[row][col];
+        copy.world = worldCopy;
+        return copy;
+    }
+    //testing the copy constructor.
+//    public static void main(String[] args) throws PatternFormatException {
+//        ArrayWorld first = new ArrayWorld("nm:ss:2:2:0:0:10 10");
+//        ArrayWorld second = new ArrayWorld(first);
+//        System.out.println(first.equals(second));
+//        second.setCell(0,0, Cell.DEAD);
+//        System.out.println((first.equals(second)));
+//    }
 }

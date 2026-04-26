@@ -5,21 +5,19 @@ import am.aua.gameoflife.exceptions.PatternFormatException;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class PatternStore {
-    private Pattern[] patterns;
-    public static final int MAX_NUMBER_PATTERNS = 1000;
-    private int numberUsed;
-
+    private ArrayList<Pattern> patterns;
     /**
      *
      * @param source - URL/file path
      * @throws IOException
      */
     public PatternStore(String source) throws IOException {
-        patterns = new Pattern[MAX_NUMBER_PATTERNS];
-        numberUsed = 0;
+        patterns = new ArrayList<>();
         if (source.startsWith("http://") || source.startsWith("https://"))
             loadFromURL(source);
         else
@@ -32,8 +30,7 @@ public class PatternStore {
      * @throws IOException
      */
     public PatternStore(Reader source) throws IOException {
-        patterns = new Pattern[MAX_NUMBER_PATTERNS];
-        numberUsed = 0;
+        patterns = new ArrayList<>();
         load(source);
     }
 
@@ -43,16 +40,14 @@ public class PatternStore {
         String line;
         outerLoop:
         while((line = b.readLine()) != null){
-            if(numberUsed>=MAX_NUMBER_PATTERNS) break;
             System.out.println(line);
             try{
                 Pattern current = new Pattern(line);
-                for(int i =0; i<numberUsed; i++){
-                    if(current.equals(patterns[i]))
+                for(int i =0; i<patterns.size(); i++){
+                    if(current.equals(patterns.get(i)))
                         continue outerLoop;
                 }
-                patterns[numberUsed] = current;
-                numberUsed++;
+                patterns.add(current);
             } catch (PatternFormatException e) {
                 System.out.println(line);
                 System.out.println(e.getMessage());
@@ -75,11 +70,12 @@ public class PatternStore {
      * Returns a copy of the patterns stored in the object as an array.
      * @return a copy of the patterns stored in the object as an array.
      */
-    public Pattern[] getPatterns() {
-        Pattern[] copy = new Pattern[numberUsed];
-        for(int i = 0; i<numberUsed; i++)
-            copy[i] = patterns[i];
+    public ArrayList<Pattern> getPatternsNameSorted() {
+
+        ArrayList<Pattern> copy = new ArrayList<>(patterns);
+        Collections.sort(copy);
         return copy;
+
     }
 
     /**
@@ -87,9 +83,9 @@ public class PatternStore {
      * @return a sorted array of the authors of the patterns.
      */
     public String[] getPatternAuthors() {
-        String[] authors = new String[numberUsed];
+        String[] authors = new String[patterns.size()];
         for(int i = 0; i<authors.length; i++)
-            authors[i] = patterns[i].getAuthor();
+            authors[i] = patterns.get(i).getAuthor();
         Arrays.sort(authors);
         return authors;
     }
@@ -99,9 +95,9 @@ public class PatternStore {
      * @return a sorted array of the names of the patterns.
      */
     public String[] getPatternNames() {
-        String[] names = new String[numberUsed];
+        String[] names = new String[patterns.size()];
         for(int i = 0; i<names.length; i++)
-            names[i] = patterns[i].getName();
+            names[i] = patterns.get(i).getName();
         Arrays.sort(names);
         return names;
     }

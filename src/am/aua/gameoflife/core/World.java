@@ -7,7 +7,7 @@ import java.util.Scanner;
 /**
  * The Board og the game.
  */
-public abstract class World {
+public abstract class World implements Cloneable{
     private Pattern pattern;
     private int generation;
     enum Cell {ALIVE, DEAD}
@@ -158,6 +158,14 @@ public abstract class World {
             result.append("\n");
         }
         return result.toString();
+    }
+    @Override
+    public World clone(){
+        try{
+            return  (World)super.clone();
+        } catch (CloneNotSupportedException e) {
+            return null; // to keep compiler happy;
+        }
     }
 }
 
