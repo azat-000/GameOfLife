@@ -10,7 +10,7 @@ import java.util.Scanner;
 public abstract class World implements Cloneable{
     private Pattern pattern;
     private int generation;
-    enum Cell {ALIVE, DEAD}
+    public enum Cell {ALIVE, DEAD}
     //constructors
     /**
      *

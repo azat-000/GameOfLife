@@ -70,12 +70,11 @@ public class PatternStore {
      * Returns a copy of the patterns stored in the object as an array.
      * @return a copy of the patterns stored in the object as an array.
      */
-    public ArrayList<Pattern> getPatternsNameSorted() {
-
+    public Pattern[] getPatternsNameSorted() {
         ArrayList<Pattern> copy = new ArrayList<>(patterns);
         Collections.sort(copy);
-        return copy;
-
+        Pattern[] copyArray = new Pattern[copy.size()];
+        return copy.toArray(copyArray);
     }
 
     /**

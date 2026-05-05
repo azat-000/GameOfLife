@@ -131,8 +131,7 @@ public class Pattern implements Comparable<Pattern> {
      */
     @Override
     public final String toString() {
-        return name + ":" + author + ":" + width + ":" + height + ":"
-                + startCol + ":" + startRow + ":" + cells;
+        return name + " (" + author+")";
     }
     @Override
     public final boolean equals(Object o) {

@@ -90,7 +90,7 @@ public class GameOfLife {
                 }
             }
             else if(response.equals("l")){
-                ArrayList<Pattern> names = store.getPatternsNameSorted();
+                Pattern[] names = store.getPatternsNameSorted();
                 int i = 0;
                 for(Pattern p:names){
                     System.out.println(i+" "+p.getName()+" ("+p.getAuthor()+")" );
@@ -98,9 +98,9 @@ public class GameOfLife {
                 }
             }else if(response.startsWith("p")){
                 cachedWorlds.clear();
-                ArrayList<Pattern> names = store.getPatternsNameSorted();
+                Pattern[] names = store.getPatternsNameSorted();
                 int patternNum = Integer.parseInt(response.substring(2));
-                Pattern assosiatedPattern = names.get(patternNum);
+                Pattern assosiatedPattern = names[patternNum];
                 if(assosiatedPattern.getWidth() * assosiatedPattern.getHeight() > 64)
                     world = new ArrayWorld(assosiatedPattern);
                 else
